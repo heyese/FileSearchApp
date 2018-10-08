@@ -13,22 +13,20 @@ def main():
 
     print('\nWill search .txt files under:\n{}\nfor the given string:\n{}\n'.format(directory, search_string))
 
-    results = search(directory, search_string)
-
-    for i in results:
+    for i in search(directory, search_string):
         print('Path: {} ; Line number: {} ; Text: {}'.format(
             i.path, i.line_number, i.line
         ))
 
 
 def search(directory, search_string):
-    matches = []
+
     for item in os.listdir(directory):
         full_path = os.path.join(directory, item)
         if os.path.isdir(full_path):
             # USE RECURSION to examine subdirectories
             # This is memory intensive
-            matches.extend(search(full_path, search_string))
+            yield from search(full_path, search_string)
 
         if os.path.splitext(full_path)[1] == '.txt':
             with open(full_path, 'r') as f:
@@ -37,8 +35,7 @@ def search(directory, search_string):
                     i += 1
                     if line.lower().find(search_string.lower()) != -1:
                         result = SearchResult(full_path, i, line.strip())
-                        matches.append(result)
-    return matches
+                        yield result
 
 def get_search_directory():
     while True:
